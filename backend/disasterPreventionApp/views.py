@@ -73,6 +73,9 @@ def update_prevention(request, id):
         return Response({"Error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
 # Delete Prevention Strategy
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
@@ -87,6 +90,43 @@ def delete_prevention(request, id):
         # Delete the prevention strategy
         prevention.delete()
         return Response({"Message": "Prevention strategy deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    
+    except PreventionStrategy.DoesNotExist:
+        return Response({"Error": "Prevention strategy not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"Error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+# Update Prevention Strategy Status
+@api_view(['PATCH'])
+@permission_classes([AllowAny])
+def update_prevention_status(request, id):
+    try:
+        prevention = PreventionStrategy.objects.get(id=id)
+
+        # Check if the logged-in user is the one who created the associated disaster prediction
+        # if prevention.prediction.created_by != request.user:
+        #     return Response({"Error": "You are not authorized to update this prevention strategy status."}, 
+        #                    status=status.HTTP_403_FORBIDDEN)
+
+        # Get status from request
+        new_status = request.data.get('status')
+        
+        # Validate status
+        if new_status not in [choice[0] for choice in PreventionStrategy.STATUS_CHOICES]:
+            return Response({"Error": "Invalid status. Choose from 'waiting', 'pending', or 'finished'."}, 
+                           status=status.HTTP_400_BAD_REQUEST)
+        
+        # Update status
+        prevention.status = new_status
+        prevention.save()
+        
+        # Return the updated prevention strategy
+        serializer = PreventionStrategySerializer(prevention)
+        return Response(serializer.data)
     
     except PreventionStrategy.DoesNotExist:
         return Response({"Error": "Prevention strategy not found"}, status=status.HTTP_404_NOT_FOUND)

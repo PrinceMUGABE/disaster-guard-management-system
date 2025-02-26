@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'disaster_guard',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': '07288',
         'HOST': 'localhost',
         'PORT': '3306',
 

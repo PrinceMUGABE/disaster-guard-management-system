@@ -40,17 +40,17 @@ class PreventionStrategySerializer(serializers.ModelSerializer):
     human_resources = serializers.SerializerMethodField()
     equipment_resources = serializers.SerializerMethodField()
     implementation_timeline = serializers.JSONField()
-
+    
     def get_human_resources(self, obj):
         if obj.resource_requirements and 'personnel' in obj.resource_requirements:
             return obj.resource_requirements['personnel']
         return None
-
+    
     def get_equipment_resources(self, obj):
         if obj.resource_requirements and 'equipment' in obj.resource_requirements:
             return obj.resource_requirements['equipment']
         return None
-
+    
     class Meta:
         model = PreventionStrategy
         fields = [
@@ -67,10 +67,6 @@ class PreventionStrategySerializer(serializers.ModelSerializer):
             'human_resources',
             'equipment_resources',
             'budget',
+            'status',  # Added the status field here
             'created_at',
         ]
-        
-        
-        
-        
-        

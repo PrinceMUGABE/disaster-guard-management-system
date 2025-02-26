@@ -7,6 +7,8 @@ from django.db.utils import IntegrityError
 from rest_framework.response import Response
 from .models import DisasterPrediction
 from disasterPreventionApp.models import PreventionStrategy
+from django.utils import timezone
+from datetime import timedelta
 
 import joblib
 import json
@@ -59,7 +61,7 @@ def get_weather_data(location):
         return weather_info
     else:
         print("\n Weather information not found from API\n")
-        raise Exception(f"COuld not find district in on the map: {response.status_code}")
+        raise Exception(f"Could not find district in on the map: {response.status_code}")
 
 def get_sector_soil_type(dataset, district_name, sector_name):
     """
@@ -314,172 +316,7 @@ def process_location(location: str, sector: str) -> Dict[str, Union[str, Dict]]:
 
 
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def predict_disaster(request):
-#     """
-#     API endpoint for disaster prediction.
-#     """
-#     location = request.data.get('district')
-#     sector = request.data.get('sector')
-    
-#     if not location or not sector:
-#         return Response({
-#             'Error': 'Both district and sector are required'
-#         }, status=400)
-    
-#     result = process_location(location, sector)
-    
-#     if 'Error' in result:
-#         # Handle case where result contains an error
-#         print(f"\nError occurred: {result['Error']}")
-#         return Response(result, status=400)
-    
-#     # Log the results
-#     print("\nPrediction Results:")
-#     for key, value in result.items():
-#         print(f"{key}: {value}")
-    
-#     # Save prediction result to the database
-#     DisasterPrediction.objects.create(
-#         created_by=request.user,
-#         district=result.get('District', location),
-#         sector=result.get('Sector', sector),
-#         temperature=result.get('Temperature'),
-#         wind_speed=result.get('Wind Speed'),
-#         humidity=result.get('Humidity'),
-#         rainfall=result.get('Rainfall'),
-#         soil_type=result.get('Soil Type'),
-#         risk_level=result.get('Risk Level'),
-#         confidence_score=result.get('Confidence Score'),
-#         most_likely_disaster=result.get('Most Likely Disaster')
-#     )
-    
-#     dps = DisasterPreventionSystem()
-    
-#     # Analyze the prediction
-#     prevention_plan = dps.analyze_prediction(result)
 
-#     # Print the detailed prevention plan
-#     print("\nDISASTER PREVENTION PLAN")
-#     print("=" * 50)
-#     print(f"\nLocation: {prevention_plan['location']['district']} District, {prevention_plan['location']['sector']} Sector")
-
-#     print("\nCurrent Conditions:")
-#     print("-" * 30)
-#     for key, value in prevention_plan['current_conditions'].items():
-#         print(f"{key.title()}: {value}")
-
-#     print("\nRisk Assessment:")
-#     print("-" * 30)
-#     print(f"Risk Level: {prevention_plan['risk_assessment']['level']}")
-#     print(f"Confidence Score: {prevention_plan['risk_assessment']['confidence']}%")
-
-#     print("\nPrevention Strategies:")
-#     print("-" * 30)
-#     strategies = prevention_plan['prevention_strategies']
-#     for timeframe in ['immediate_actions', 'short_term_actions', 'long_term_actions']:
-#         if timeframe in strategies:
-#             print(f"\n{timeframe.replace('_', ' ').title()}:")
-#             for action in strategies[timeframe]:
-#                 print(f"\n• Action: {action['action']}")
-#                 print(f"  Description: {action['description']}")
-#                 print(f"  Priority: {action['priority']}")
-#                 print(f"  Responsible: {action['responsible_entity']}")
-
-#     print("\nImplementation Timeline:")
-#     print("-" * 30)
-#     for phase, date in prevention_plan['timeline'].items():
-#         print(f"{phase.title()}: {date}")
-
-#     print("\nResource Requirements:")
-#     print("-" * 30)
-#     resources = prevention_plan['resource_requirements']
-#     print("\nPersonnel Required:")
-#     for role, count in resources['personnel'].items():
-#         print(f"• {role.replace('_', ' ').title()}: {count}")
-
-#     print("\nEquipment Required:")
-#     for item, quantity in resources['equipment'].items():
-#         print(f"• {item.replace('_', ' ').title()}: {quantity}")
-
-#     print(f"\nEstimated Budget: ${resources['estimated_budget']:,.2f}")
-    
-#     return Response(result)
-
-
-
-
-
-
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def predict_disaster(request):
-#     location = request.data.get('district')
-#     sector = request.data.get('sector')
-
-#     if not location or not sector:
-#         return Response({'Error': 'Both district and sector are required'}, status=400)
-
-#     result = process_location(location, sector)
-
-#     if 'Error' in result:
-#         return Response(result, status=400)
-
-#     # Save prediction result
-#     prediction = DisasterPrediction.objects.create(
-#         created_by=request.user,
-#         district=result.get('District', location),
-#         sector=result.get('Sector', sector),
-#         temperature=result.get('Temperature'),
-#         wind_speed=result.get('Wind Speed'),
-#         humidity=result.get('Humidity'),
-#         rainfall=result.get('Rainfall'),
-#         soil_type=result.get('Soil Type'),
-#         risk_level=result.get('Risk Level'),
-#         confidence_score=result.get('Confidence Score'),
-#         most_likely_disaster=result.get('Most Likely Disaster')
-#     )
-
-#     dps = DisasterPreventionSystem()
-#     prevention_plan = dps.analyze_prediction(result)
-
-#     # Save prevention strategies by timeframe
-#     for timeframe in ['immediate_actions', 'short_term_actions', 'long_term_actions']:
-#         if timeframe in prevention_plan['prevention_strategies']:
-#             for action in prevention_plan['prevention_strategies'][timeframe]:
-#                 PreventionStrategy.objects.create(
-#                     prediction=prediction,
-#                     action=action['action'],
-#                     description=action['description'],
-#                     priority=action['priority'],
-#                     responsible_entity=action['responsible_entity'],
-#                     timeframe=timeframe.replace('_', ' ').title(),
-#                     # Save detailed conditions and requirements
-#                     current_conditions={
-#                         'temperature': prevention_plan['current_conditions'].get('temperature'),
-#                         'wind_speed': prevention_plan['current_conditions'].get('wind_speed'),
-#                         'humidity': prevention_plan['current_conditions'].get('humidity'),
-#                         'rainfall': prevention_plan['current_conditions'].get('rainfall'),
-#                         'soil_type': prevention_plan['current_conditions'].get('soil_type')
-#                     },
-#                     risk_assessment={
-#                         'level': prevention_plan['risk_assessment']['level'],
-#                         'confidence': prevention_plan['risk_assessment']['confidence']
-#                     },
-#                     implementation_timeline={
-#                         'immediate': prevention_plan['timeline'].get('immediate'),
-#                         'short_term': prevention_plan['timeline'].get('short_term'),
-#                         'long_term': prevention_plan['timeline'].get('long_term')
-#                     },
-#                     resource_requirements={
-#                         'personnel': prevention_plan['resource_requirements']['personnel'],
-#                         'equipment': prevention_plan['resource_requirements']['equipment']
-#                     },
-#                     budget=prevention_plan['resource_requirements']['estimated_budget'] / len(prevention_plan['prevention_strategies'][timeframe])  # Divide budget by number of actions
-#                 )
-
-#     return Response(result)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -489,6 +326,21 @@ def predict_disaster(request):
 
     if not location or not sector:
         return Response({'Error': 'Both district and sector are required'}, status=400)
+    
+    
+    # Check if user has made a prediction in the last 7 days
+    one_week_ago = timezone.now() - timedelta(days=7)
+    recent_prediction = DisasterPrediction.objects.filter(
+        created_by=request.user,
+        created_at__gte=one_week_ago
+    ).exists()
+    
+    if recent_prediction:
+        print("\n\n You can only make one prediction per week. Please try again later.\n\n")
+        return Response({
+            'Error': 'You can only make one prediction per week. Please try again later.',
+            'next_available': one_week_ago + timedelta(days=7)
+        }, status=400)
 
     result = process_location(location, sector)
 

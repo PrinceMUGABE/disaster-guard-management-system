@@ -16,4 +16,5 @@ urlpatterns = [
     
     # Delete prevention by ID
     path('delete/<int:id>/', views.delete_prevention, name='delete_prevention'),
+    path('<int:id>/status/', views.update_prevention_status, name='update_prevention_status'),
 ]

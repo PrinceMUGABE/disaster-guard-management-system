@@ -24,10 +24,13 @@ def register_user(request):
     phone_number = request.data.get('phone')
     email = request.data.get('email')
     password = request.data.get('password')
+    first_name = request.data.get('first_name')
+    last_name = request.data.get('last_name')
+    
 
     # Basic validations
-    if not phone_number or not email  or not password:
-        return Response({"error": "Phone number, email and password are required."}, status=400)
+    if not phone_number or not email  or not password or not first_name or not last_name:
+        return Response({"error": "First name, Last name, Phone number, email and password are required."}, status=400)
     
      # Validate password strength
     if len(password) < 6:
@@ -57,6 +60,8 @@ def register_user(request):
 
         # Create the user
         user = CustomUser.objects.create_user(
+            first_name=first_name,
+            last_name=last_name,
             phone_number=phone_number,
             email=email,
             role=role,
@@ -68,7 +73,7 @@ def register_user(request):
         # Send the password to the user's email
         send_mail(
             subject="Your Account Password",
-            message=f"Hello, Your account has been created in Disaster-Guard-App. \nYour password is: {password}",
+            message=f"Hello {last_name} {first_name}\n, Your account has been created in Disaster-Guard-App. \nYour password is: {password}",
             from_email="no-reply@disasterGuard.com",
             recipient_list=[email],
         )
@@ -106,6 +111,8 @@ def login_user(request):
     # Include user details in the response
     return Response({
         "id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
         "phone_number": user.phone_number,
         "email": user.email,
         "role": user.role,
@@ -237,12 +244,14 @@ from .models import CustomUser  # Adjust this import as per your project structu
 @permission_classes([IsAuthenticated])
 def update_user(request, user_id):
     phone_number = request.data.get('phone_number')
+    first_name = request.data.get('first_name')
+    last_name = request.data.get('last_name')
     email = request.data.get('email')
     role = request.data.get('role')
 
     # Validate required fields
-    if not phone_number or not email or not role:
-        return Response({"message": "Phone number, email, and role are required for updating a user."}, status=400)
+    if not phone_number or not email or not role or not first_name or not last_name:
+        return Response({"message": "First name, Last name, Phone number, email, and role are required for updating a user."}, status=400)
 
     try:
         user = CustomUser.objects.get(id=user_id)
@@ -257,6 +266,8 @@ def update_user(request, user_id):
             return Response({"message": "A user with this email already exists."}, status=400)
 
         # Update user fields
+        user.first_name = first_name
+        user.last_name = last_name
         user.phone_number = phone_number
         user.email = email
         user.role = role
@@ -281,7 +292,7 @@ def list_all_users(request):
     #     return Response({"error": "You are not authorized to view this resource."}, status=403)
     
     users = CustomUser.objects.all().values(
-        'id', 'phone_number', 'email', 'role', 'created_at',
+        'id', 'first_name', 'last_name', 'phone_number', 'email', 'role', 'created_at',
     )
     return Response({"users": list(users)}, status=200)
 
@@ -300,6 +311,8 @@ def get_user_by_id(request, user_id):
        
         return Response({
             "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "phone_number": user.phone_number,
             "email": user.email,
             "role": user.role,
@@ -327,6 +340,8 @@ def get_user_by_email(request):
         created_by_user = user.created_by
         return Response({
             "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "phone_number": user.phone_number,
             "email": user.email,
             "role": user.role,
@@ -355,6 +370,8 @@ def get_user_by_phone(request):
         created_by_user = user.created_by
         return Response({
             "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "phone_number": user.phone_number,
             "email": user.email,
             "role": user.role,
