@@ -26,6 +26,7 @@ def register_user(request):
     password = request.data.get('password')
     first_name = request.data.get('first_name')
     last_name = request.data.get('last_name')
+    role = request.data.get('role')
     
 
     # Basic validations
@@ -54,7 +55,7 @@ def register_user(request):
 
 
     try:
-        role = 'user'
+        # role = 'user'
         
         hashed_password = make_password(password)
 
