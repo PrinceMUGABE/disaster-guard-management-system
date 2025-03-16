@@ -329,18 +329,18 @@ def predict_disaster(request):
     
     
     # Check if user has made a prediction in the last 7 days
-    one_week_ago = timezone.now() - timedelta(days=7)
-    recent_prediction = DisasterPrediction.objects.filter(
-        created_by=request.user,
-        created_at__gte=one_week_ago
-    ).exists()
+    # one_week_ago = timezone.now() - timedelta(days=7)
+    # recent_prediction = DisasterPrediction.objects.filter(
+    #     created_by=request.user,
+    #     created_at__gte=one_week_ago
+    # ).exists()
     
-    if recent_prediction:
-        print("\n\n You can only make one prediction per week. Please try again later.\n\n")
-        return Response({
-            'Error': 'You can only make one prediction per week. Please try again later.',
-            'next_available': one_week_ago + timedelta(days=7)
-        }, status=400)
+    # if recent_prediction:
+    #     print("\n\n You can only make one prediction per week. Please try again later.\n\n")
+    #     return Response({
+    #         'Error': 'You can only make one prediction per week. Please try again later.',
+    #         'next_available': one_week_ago + timedelta(days=7)
+    #     }, status=400)
 
     result = process_location(location, sector)
 
